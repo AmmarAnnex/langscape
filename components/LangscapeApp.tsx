@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { User, LogIn, LogOut, Menu, X, BarChart3, FileText, TestTube, Settings, ChevronRight } from 'lucide-react';
 
@@ -92,40 +93,40 @@ const LoginForm = () => {
           <p className="text-gray-400 font-light">Enterprise GEO Command Center</p>
         </div>
         
-        <div className="bg-white p-8 border border-gray-200">
+        <div className="bg-white p-8 border border-gray-900">
           <h2 className="text-2xl font-thin mb-6">{isLogin ? 'Sign In' : 'Create Account'}</h2>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-normal mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
                 placeholder="you@company.com"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
+              <label className="block text-sm font-normal mb-2">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
                 placeholder="••••••••"
               />
             </div>
             
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium mb-2">Company</label>
+                <label className="block text-sm font-normal mb-2">Company</label>
                 <input
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-black"
+                  className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
                   placeholder="Acme Corp"
                 />
               </div>
@@ -134,17 +135,17 @@ const LoginForm = () => {
           
           <button
             onClick={handleSubmit}
-            className="w-full mt-6 bg-black text-white py-3 hover:bg-gray-900 transition-colors"
+            className="w-full mt-6 bg-black text-white py-4 font-normal hover:bg-gray-900 transition-colors"
           >
             {isLogin ? 'Sign In' : 'Start 14-Day Trial'}
           </button>
           
-          <p className="text-center mt-4 text-sm">
+          <p className="text-center mt-6 text-sm">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="underline hover:no-underline"
+              className="font-normal underline hover:no-underline"
             >
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
