@@ -3,6 +3,10 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { User, LogIn, LogOut, Menu, X, BarChart3, FileText, TestTube, Settings, ChevronRight } from 'lucide-react';
 
+// Import the GEO tools
+import ContentAnalyzer from './ContentAnalyzer';
+import PlatformTester from './PlatformTester';
+
 // Auth Context
 interface AuthContextType {
   user: any;
@@ -285,27 +289,9 @@ const Dashboard = () => {
             </div>
           )}
           
-          {activeSection === 'analyzer' && (
-            <div className="bg-white border-2 border-black p-16 text-center max-w-2xl mx-auto">
-              <FileText size={64} className="mx-auto mb-6 text-black" />
-              <h3 className="text-3xl font-thin mb-4">Content Analyzer</h3>
-              <p className="text-gray-600 mb-8 font-light">Analyze and optimize your content for AI search engines</p>
-              <button className="px-8 py-4 bg-black text-white hover:bg-gray-900 transition-colors uppercase tracking-wider text-sm font-light">
-                Launch Analyzer
-              </button>
-            </div>
-          )}
+          {activeSection === 'analyzer' && <ContentAnalyzer />}
           
-          {activeSection === 'tester' && (
-            <div className="bg-white border-2 border-black p-16 text-center max-w-2xl mx-auto">
-              <TestTube size={64} className="mx-auto mb-6 text-black" />
-              <h3 className="text-3xl font-thin mb-4">Platform Tester</h3>
-              <p className="text-gray-600 mb-8 font-light">Test your content across ChatGPT, Claude, Perplexity & more</p>
-              <button className="px-8 py-4 bg-black text-white hover:bg-gray-900 transition-colors uppercase tracking-wider text-sm font-light">
-                Launch Tester
-              </button>
-            </div>
-          )}
+          {activeSection === 'tester' && <PlatformTester />}
           
           {activeSection === 'settings' && (
             <div className="max-w-2xl">
