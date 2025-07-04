@@ -1,9 +1,18 @@
 "use client"
+
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { User, LogIn, LogOut, Menu, X, BarChart3, FileText, TestTube, Settings, ChevronRight } from 'lucide-react';
 
 // Auth Context
-const AuthContext = createContext(null);
+interface AuthContextType {
+  user: any;
+  login: (email: string, password: string) => boolean;
+  signup: (email: string, password: string, company: string) => boolean;
+  logout: () => void;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 const useAuth = () => {
   const context = useContext(AuthContext);
@@ -11,8 +20,8 @@ const useAuth = () => {
   return context;
 };
 
-const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +33,7 @@ const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (email, password) => {
+  const login = (email: string, password: string) => {
     // Simulate auth - replace with real API call
     const mockUser = { 
       id: '1', 
@@ -38,7 +47,7 @@ const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const signup = (email, password, company) => {
+  const signup = (email: string, password: string, company: string) => {
     // Simulate signup - replace with real API call
     const mockUser = { 
       id: '1', 
@@ -87,46 +96,46 @@ const LoginForm = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-thin text-white mb-2 tracking-wide">langscape</h1>
-          <p className="text-gray-400 font-light">Enterprise GEO Command Center</p>
+      <div className="w-full max-w-md">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-thin text-white mb-3 tracking-wider lowercase">langscape</h1>
+          <p className="text-gray-400 font-light text-sm tracking-wide uppercase">Enterprise GEO Command Center</p>
         </div>
         
-        <div className="bg-white p-8 border border-gray-900">
-          <h2 className="text-2xl font-thin mb-6">{isLogin ? 'Sign In' : 'Create Account'}</h2>
+        <div className="bg-white p-10 border-2 border-white">
+          <h2 className="text-3xl font-thin mb-8 text-center">{isLogin ? 'Sign In' : 'Create Account'}</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-normal mb-2">Email</label>
+              <label className="block text-xs font-normal mb-2 uppercase tracking-wider text-gray-600">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
+                className="w-full px-0 py-3 border-0 border-b-2 border-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent"
                 placeholder="you@company.com"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-normal mb-2">Password</label>
+              <label className="block text-xs font-normal mb-2 uppercase tracking-wider text-gray-600">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
+                className="w-full px-0 py-3 border-0 border-b-2 border-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent"
                 placeholder="••••••••"
               />
             </div>
             
             {!isLogin && (
               <div>
-                <label className="block text-sm font-normal mb-2">Company</label>
+                <label className="block text-xs font-normal mb-2 uppercase tracking-wider text-gray-600">Company</label>
                 <input
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-900 focus:outline-none focus:border-black transition-colors"
+                  className="w-full px-0 py-3 border-0 border-b-2 border-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent"
                   placeholder="Acme Corp"
                 />
               </div>
@@ -135,17 +144,17 @@ const LoginForm = () => {
           
           <button
             onClick={handleSubmit}
-            className="w-full mt-6 bg-black text-white py-4 font-normal hover:bg-gray-900 transition-colors"
+            className="w-full mt-10 bg-black text-white py-4 font-light tracking-wider hover:bg-gray-900 transition-all duration-200 text-sm uppercase"
           >
             {isLogin ? 'Sign In' : 'Start 14-Day Trial'}
           </button>
           
-          <p className="text-center mt-6 text-sm">
+          <p className="text-center mt-8 text-xs text-gray-600">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="font-normal underline hover:no-underline"
+              className="font-normal text-black underline hover:no-underline"
             >
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
@@ -178,29 +187,29 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-black text-white transition-all duration-200`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-black text-white transition-all duration-200 flex-shrink-0`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            <h1 className={`text-2xl font-thin tracking-wide ${!sidebarOpen && 'hidden'}`}>langscape</h1>
+            <h1 className={`text-2xl font-thin tracking-wider lowercase ${!sidebarOpen && 'hidden'}`}>langscape</h1>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-800 rounded"
+              className="p-2 hover:bg-gray-900 rounded transition-colors"
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
           
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navigation.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-800 transition-colors ${
-                  activeSection === item.id ? 'bg-gray-800' : ''
+                className={`w-full flex items-center space-x-3 px-3 py-3 hover:bg-gray-900 transition-colors text-sm ${
+                  activeSection === item.id ? 'bg-gray-900 border-l-2 border-white' : ''
                 }`}
               >
                 <item.icon size={20} />
-                {sidebarOpen && <span>{item.name}</span>}
+                {sidebarOpen && <span className="font-light">{item.name}</span>}
               </button>
             ))}
           </nav>
@@ -208,17 +217,19 @@ const Dashboard = () => {
         
         <div className="absolute bottom-0 w-full p-6 border-t border-gray-800">
           <div className={`flex items-center space-x-3 mb-4 ${!sidebarOpen && 'justify-center'}`}>
-            <User size={20} />
+            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+              <User size={16} />
+            </div>
             {sidebarOpen && (
               <div className="flex-1">
-                <p className="text-sm font-medium">{user?.name}</p>
+                <p className="text-sm font-normal">{user?.name}</p>
                 <p className="text-xs text-gray-400">{user?.company}</p>
               </div>
             )}
           </div>
           <button
             onClick={logout}
-            className={`flex items-center space-x-2 text-sm text-gray-400 hover:text-white ${!sidebarOpen && 'justify-center'}`}
+            className={`flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors ${!sidebarOpen && 'justify-center'}`}
           >
             <LogOut size={16} />
             {sidebarOpen && <span>Sign Out</span>}
@@ -227,44 +238,44 @@ const Dashboard = () => {
       </div>
       
       {/* Main Content */}
-      <div className="flex-1">
-        <header className="bg-white border-b border-gray-200 px-8 py-4">
+      <div className="flex-1 overflow-hidden">
+        <header className="bg-white border-b border-gray-200 px-8 py-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-thin">{navigation.find(n => n.id === activeSection)?.name}</h2>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Plan: {user?.plan}</span>
-              <button className="px-4 py-2 bg-black text-white text-sm hover:bg-gray-900">
+            <h2 className="text-3xl font-thin">{navigation.find(n => n.id === activeSection)?.name}</h2>
+            <div className="flex items-center space-x-6">
+              <span className="text-sm text-gray-500 uppercase tracking-wider">Plan: <span className="text-black font-normal">{user?.plan}</span></span>
+              <button className="px-6 py-2 bg-black text-white text-sm hover:bg-gray-900 transition-colors uppercase tracking-wider font-light">
                 Upgrade
               </button>
             </div>
           </div>
         </header>
         
-        <main className="p-8">
+        <main className="p-8 overflow-y-auto h-[calc(100vh-5rem)]">
           {activeSection === 'overview' && (
             <div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, i) => (
-                  <div key={i} className="bg-white border border-gray-200 p-6">
-                    <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-                    <p className="text-3xl font-light mb-2">{stat.value}</p>
-                    <p className="text-sm text-green-600">{stat.change} this month</p>
+                  <div key={i} className="bg-white border-2 border-black p-6 hover:shadow-lg transition-shadow">
+                    <p className="text-xs uppercase tracking-wider text-gray-600 mb-2">{stat.label}</p>
+                    <p className="text-4xl font-thin mb-2">{stat.value}</p>
+                    <p className="text-sm text-green-600 font-light">{stat.change} this month</p>
                   </div>
                 ))}
               </div>
               
-              <div className="bg-gray-50 border border-gray-200 p-8">
-                <h3 className="text-xl font-light mb-4">Recent Activity</h3>
+              <div className="bg-white border-2 border-black p-8">
+                <h3 className="text-2xl font-thin mb-6">Recent Activity</h3>
                 <div className="space-y-4">
                   {[
                     { title: 'Content optimization completed', desc: 'Blog post: "AI Search Strategies for 2025"' },
                     { title: 'Platform test completed', desc: '4/4 platforms analyzed for "best CRM software"' },
                     { title: 'New competitor detected', desc: 'Competitor X now ranking for your keywords' }
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
+                    <div key={i} className="flex items-center justify-between py-4 border-b border-gray-200 last:border-0">
                       <div>
-                        <p className="font-medium">{item.title}</p>
-                        <p className="text-sm text-gray-500">{item.desc}</p>
+                        <p className="font-normal text-lg">{item.title}</p>
+                        <p className="text-sm text-gray-600 font-light">{item.desc}</p>
                       </div>
                       <ChevronRight size={20} className="text-gray-400" />
                     </div>
@@ -275,22 +286,22 @@ const Dashboard = () => {
           )}
           
           {activeSection === 'analyzer' && (
-            <div className="bg-gray-50 border border-gray-200 p-8 text-center">
-              <FileText size={48} className="mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-light mb-2">Content Analyzer</h3>
-              <p className="text-gray-500 mb-4">Analyze and optimize your content for AI search engines</p>
-              <button className="px-6 py-3 bg-black text-white hover:bg-gray-900">
+            <div className="bg-white border-2 border-black p-16 text-center max-w-2xl mx-auto">
+              <FileText size={64} className="mx-auto mb-6 text-black" />
+              <h3 className="text-3xl font-thin mb-4">Content Analyzer</h3>
+              <p className="text-gray-600 mb-8 font-light">Analyze and optimize your content for AI search engines</p>
+              <button className="px-8 py-4 bg-black text-white hover:bg-gray-900 transition-colors uppercase tracking-wider text-sm font-light">
                 Launch Analyzer
               </button>
             </div>
           )}
           
           {activeSection === 'tester' && (
-            <div className="bg-gray-50 border border-gray-200 p-8 text-center">
-              <TestTube size={48} className="mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-light mb-2">Platform Tester</h3>
-              <p className="text-gray-500 mb-4">Test your content across ChatGPT, Claude, Perplexity & more</p>
-              <button className="px-6 py-3 bg-black text-white hover:bg-gray-900">
+            <div className="bg-white border-2 border-black p-16 text-center max-w-2xl mx-auto">
+              <TestTube size={64} className="mx-auto mb-6 text-black" />
+              <h3 className="text-3xl font-thin mb-4">Platform Tester</h3>
+              <p className="text-gray-600 mb-8 font-light">Test your content across ChatGPT, Claude, Perplexity & more</p>
+              <button className="px-8 py-4 bg-black text-white hover:bg-gray-900 transition-colors uppercase tracking-wider text-sm font-light">
                 Launch Tester
               </button>
             </div>
@@ -298,24 +309,24 @@ const Dashboard = () => {
           
           {activeSection === 'settings' && (
             <div className="max-w-2xl">
-              <div className="bg-white border border-gray-200 p-6 mb-6">
-                <h3 className="text-lg font-medium mb-4">Account Settings</h3>
+              <div className="bg-white border-2 border-black p-8 mb-6">
+                <h3 className="text-2xl font-thin mb-6">Account Settings</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Email</label>
-                    <p className="text-gray-700">{user?.email}</p>
+                    <label className="block text-xs uppercase tracking-wider text-gray-600 mb-2">Email</label>
+                    <p className="text-lg font-light">{user?.email}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Company</label>
-                    <p className="text-gray-700">{user?.company}</p>
+                    <label className="block text-xs uppercase tracking-wider text-gray-600 mb-2">Company</label>
+                    <p className="text-lg font-light">{user?.company}</p>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 p-6">
-                <h3 className="text-lg font-medium mb-4">API Configuration</h3>
-                <p className="text-sm text-gray-500 mb-4">Connect your API keys for platform testing</p>
-                <button className="px-4 py-2 bg-black text-white text-sm hover:bg-gray-900">
+              <div className="bg-white border-2 border-black p-8">
+                <h3 className="text-2xl font-thin mb-6">API Configuration</h3>
+                <p className="text-sm text-gray-600 mb-6 font-light">Connect your API keys for platform testing</p>
+                <button className="px-6 py-3 bg-black text-white text-sm hover:bg-gray-900 transition-colors uppercase tracking-wider font-light">
                   Configure APIs
                 </button>
               </div>
@@ -350,7 +361,10 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white">Loading...</p>
+        <div className="text-white">
+          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="font-light">Loading...</p>
+        </div>
       </div>
     );
   }
