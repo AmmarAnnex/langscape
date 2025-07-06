@@ -1,175 +1,250 @@
-// components/ContentAnalyzer.tsx
 "use client"
 
 import React, { useState } from 'react';
-import { BarChart3, AlertCircle, TrendingUp, Target, Zap } from 'lucide-react';
+import { apiClient } from '../lib/api';
 
-interface Score {
-  platform: string;
-  score: number;
-  color: string;
+interface PlatformScore {
+  overall_score: number;
+  features: Record<string, number>;
+  recommendations: Array<{
+    priority: string;
+    action: string;
+    impact: number;
+    effort: string;
+    description: string;
+  }>;
 }
 
-interface Recommendation {
-  priority: 'high' | 'medium' | 'low';
-  action: string;
-  impact: string;
-  effort: string;
+interface AnalysisResult {
+  platforms: Record<string, PlatformScore>;
+  average_score: number;
+  top_platform: string;
+  industry_benchmark: number;
 }
 
-export default function ContentAnalyzer() {
+const ContentAnalyzer: React.FC = () => {
   const [content, setContent] = useState('');
-  const [analyzing, setAnalyzing] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState('chatgpt');
 
-  const analyzeContent = async () => {
-    if (!content.trim()) return;
-    
-    setAnalyzing(true);
-    
-    // Simulate API call - replace with real API
-    setTimeout(() => {
-      const scores: Score[] = [
-        { platform: 'ChatGPT', score: 72, color: 'bg-blue-500' },
-        { platform: 'Claude', score: 85, color: 'bg-purple-500' },
-        { platform: 'Perplexity', score: 68, color: 'bg-orange-500' },
-        { platform: 'Google AI', score: 79, color: 'bg-green-500' }
-      ];
+  const handleAnalyze = async () => {
+    if (!content.trim()) {
+      setError('Please enter some content to analyze');
+      return;
+    }
 
-      const recommendations: Recommendation[] = [
-        {
-          priority: 'high',
-          action: 'Add Q&A structure',
-          impact: 'High',
-          effort: 'Low'
-        },
-        {
-          priority: 'high',
-          action: 'Include specific data points',
-          impact: 'High',
-          effort: 'Medium'
-        },
-        {
-          priority: 'medium',
-          action: 'Break into bullet points',
-          impact: 'Medium',
-          effort: 'Low'
-        },
-        {
-          priority: 'low',
-          action: 'Add topic summary',
-          impact: 'Low',
-          effort: 'Low'
-        }
-      ];
+    setIsAnalyzing(true);
+    setError(null);
 
-      setResults({
-        scores,
-        recommendations,
-        avgScore: Math.round(scores.reduce((acc, s) => acc + s.score, 0) / scores.length),
-        wordCount: content.split(' ').length
+    try {
+      const result = await apiClient.analyzeContent({
+        content,
+        target_platforms: ['chatgpt', 'claude', 'perplexity', 'google_ai']
       });
       
-      setAnalyzing(false);
-    }, 1500);
+      setAnalysisResult(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to analyze content');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBackground = (score: number) => {
+    if (score >= 80) return 'bg-green-50 border-green-200';
+    if (score >= 60) return 'bg-yellow-50 border-yellow-200';
+    return 'bg-red-50 border-red-200';
+  };
+
+  const platformNames = {
+    chatgpt: 'ChatGPT',
+    claude: 'Claude',
+    perplexity: 'Perplexity',
+    google_ai: 'Google AI'
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-thin mb-2">Content Analyzer</h1>
-        <p className="text-gray-600 font-light">Analyze how your content will perform across AI search platforms</p>
+    <div className="h-full flex flex-col bg-white">
+      <div className="border-b border-gray-200 p-6">
+        <h1 className="text-2xl font-bold mb-2">Content Analyzer</h1>
+        <p className="text-gray-600">
+          Analyze your content for AI search optimization across platforms
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Section */}
-        <div className="bg-white border-2 border-black p-6">
-          <label className="block text-xs uppercase tracking-wider text-gray-600 mb-4">Content to Analyze</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Paste your content here..."
-            className="w-full h-64 p-4 border-2 border-gray-300 focus:border-black transition-colors resize-none font-light"
-          />
-          <div className="mt-4 flex justify-between items-center">
-            <span className="text-sm text-gray-500">{content.split(' ').filter(w => w).length} words</span>
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Content Input */}
+          <div>
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+              Content to Analyze
+            </label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste your content here for AI optimization analysis..."
+              className="w-full h-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none"
+            />
+          </div>
+
+          {/* Analyze Button */}
+          <div>
             <button
-              onClick={analyzeContent}
-              disabled={!content.trim() || analyzing}
-              className="px-6 py-3 bg-black text-white hover:bg-gray-900 transition-colors uppercase tracking-wider text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleAnalyze}
+              disabled={isAnalyzing || !content.trim()}
+              className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {analyzing ? 'Analyzing...' : 'Analyze Content'}
+              {isAnalyzing ? 'Analyzing...' : 'Analyze Content'}
             </button>
           </div>
-        </div>
 
-        {/* Results Section */}
-        <div className="space-y-6">
-          {results ? (
-            <>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Analysis Results */}
+          {analysisResult && (
+            <div className="space-y-6">
               {/* Overall Score */}
-              <div className="bg-white border-2 border-black p-6">
-                <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4">Overall AI Optimization Score</h3>
-                <div className="text-5xl font-thin mb-2">{results.avgScore}%</div>
-                <div className="w-full bg-gray-200 h-2">
-                  <div 
-                    className="bg-black h-2 transition-all duration-1000"
-                    style={{ width: `${results.avgScore}%` }}
-                  />
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold mb-4">Overall Analysis</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className={`text-3xl font-bold ${getScoreColor(analysisResult.average_score)}`}>
+                      {Math.round(analysisResult.average_score)}
+                    </div>
+                    <div className="text-sm text-gray-600">Average Score</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-blue-600">
+                      {platformNames[analysisResult.top_platform as keyof typeof platformNames]}
+                    </div>
+                    <div className="text-sm text-gray-600">Best Platform</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-gray-700">
+                      {analysisResult.industry_benchmark}
+                    </div>
+                    <div className="text-sm text-gray-600">Industry Benchmark</div>
+                  </div>
                 </div>
               </div>
 
               {/* Platform Scores */}
-              <div className="bg-white border-2 border-black p-6">
-                <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4">Platform Performance</h3>
-                <div className="space-y-3">
-                  {results.scores.map((score: Score) => (
-                    <div key={score.platform}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm font-light">{score.platform}</span>
-                        <span className="text-sm font-normal">{score.score}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 h-1">
-                        <div 
-                          className={`${score.color} h-1 transition-all duration-1000`}
-                          style={{ width: `${score.score}%` }}
-                        />
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Platform Scores</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Object.entries(analysisResult.platforms).map(([platform, data]) => (
+                    <div
+                      key={platform}
+                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                        selectedPlatform === platform
+                          ? 'border-black bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedPlatform(platform)}
+                    >
+                      <div className="text-center">
+                        <h3 className="font-medium mb-2">
+                          {platformNames[platform as keyof typeof platformNames]}
+                        </h3>
+                        <div className={`text-2xl font-bold ${getScoreColor(data.overall_score)}`}>
+                          {Math.round(data.overall_score)}
+                        </div>
+                        <div className="text-sm text-gray-600">Score</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Recommendations */}
-              <div className="bg-white border-2 border-black p-6">
-                <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4">Optimization Recommendations</h3>
-                <div className="space-y-3">
-                  {results.recommendations.map((rec: Recommendation, i: number) => (
-                    <div key={i} className="flex items-start space-x-3 pb-3 border-b border-gray-200 last:border-0">
-                      <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                        rec.priority === 'high' ? 'bg-red-500' : 
-                        rec.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`} />
-                      <div className="flex-1">
-                        <p className="font-normal">{rec.action}</p>
-                        <div className="flex space-x-4 mt-1 text-xs text-gray-500">
-                          <span>Impact: {rec.impact}</span>
-                          <span>Effort: {rec.effort}</span>
+              {/* Detailed Analysis for Selected Platform */}
+              {selectedPlatform && analysisResult.platforms[selectedPlatform] && (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold">
+                    {platformNames[selectedPlatform as keyof typeof platformNames]} Analysis
+                  </h2>
+
+                  {/* Feature Breakdown */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="font-medium mb-4">Feature Analysis</h3>
+                    <div className="space-y-3">
+                      {Object.entries(analysisResult.platforms[selectedPlatform].features).map(([feature, value]) => (
+                        <div key={feature} className="flex justify-between items-center">
+                          <span className="text-sm capitalize">
+                            {feature.replace(/_/g, ' ')}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-32 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{ width: `${Math.min(value * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium w-12">
+                              {(value * 100).toFixed(0)}%
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Recommendations */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="font-medium mb-4">Optimization Recommendations</h3>
+                    <div className="space-y-3">
+                      {analysisResult.platforms[selectedPlatform].recommendations.map((rec, index) => (
+                        <div
+                          key={index}
+                          className={`border rounded-md p-4 ${
+                            rec.priority === 'high'
+                              ? 'border-red-200 bg-red-50'
+                              : rec.priority === 'medium'
+                              ? 'border-yellow-200 bg-yellow-50'
+                              : 'border-green-200 bg-green-50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium">{rec.action}</h4>
+                            <div className="flex items-center space-x-2 text-sm">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                rec.priority === 'high'
+                                  ? 'bg-red-100 text-red-800'
+                                  : rec.priority === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}>
+                                {rec.priority}
+                              </span>
+                              <span className="text-gray-600">+{rec.impact}pts</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">{rec.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <div className="bg-gray-50 border-2 border-gray-300 border-dashed p-12 text-center">
-              <BarChart3 size={48} className="mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500 font-light">Analysis results will appear here</p>
+              )}
             </div>
           )}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ContentAnalyzer;
